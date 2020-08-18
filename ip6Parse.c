@@ -16,6 +16,7 @@
 	in the string (where point is a negative number; -1 is
 	the first character in the string, -2 the second one, etc.)
 	-256: The input string is too long
+	-257: There are too many hex digits or colons in the input string
 
    Rules: Single colon separates 16-bit (4 hex digit) numbers
           Double colon (only one allowed or error) means 
@@ -92,22 +93,31 @@ int ip6Parse(char *human, unsigned char *ip6) {
 			return -(index + 1); // Error
 		}
 
+		// If hexadecimal digit [0-9a-fA-F] seen, add it to Quad
 		if(thisHex != -1) {
 			thisQuad <<= 4;
 			thisQuad += thisHex;
 			currentHexDigit++;
-			if(currentHexDigit == 4) {
-				if(outIndex + 1 >= 16) { return -1; }
-				ip6[outIndex + 1] = thisQuad & 0xff;
-				ip6[outIndex] = thisQuad >> 8;
-				outIndex += 2;
-				thisQuad = 0;
-				currentHexDigit = 0;
-				currentQuad++;
-			}
 		}
-		// CODE HERE: Colon processing
+
+		// Single colon processing: End current Quad
+		if(*human == ':' && index != doubleColonIndex &&
+				currentHexDigit != 0) {
+			currentHexDigit = 4;
+		}
+
 		human++;
+		// Convert a series of up to four hex digits in to raw IPv6
+		if(currentHexDigit == 4 || *human == 0) {
+			if(outIndex + 1 >= 16) { return -257; }
+			ip6[outIndex + 1] = thisQuad & 0xff;
+			ip6[outIndex] = thisQuad >> 8;
+			outIndex += 2;
+			thisQuad = 0;
+			currentHexDigit = 0;
+			currentQuad++;
+		}
+
 		index++;
 	}
 	if(index >= 100) { return -256; /* Error */ }
