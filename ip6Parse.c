@@ -10,7 +10,12 @@
         has 16 bytes to store the resulting IP.
    
    Output code: 1: The IPv6 IP was added
-                -1: There was an error adding the IP
+                Less than 0: There was an error adding the IP
+
+   Error codes: -1 to -255 There was a syntax error at this point
+	in the string (where point is a negative number; -1 is
+	the first character in the string, -2 the second one, etc.)
+	-256: The input string is too long
 
    Rules: Single colon separates 16-bit (4 hex digit) numbers
           Double colon (only one allowed or error) means 
@@ -52,7 +57,7 @@ int ip6Parse(char *human, unsigned char *ip6) {
 	while(*human != 0 && index < 100) {
 		if(last == ':' && *human == ':') {
 			if(doubleColonIndex != -1) {
-				return -1; // Error
+				return -(index + 1);
 			}
 			doubleColonIndex = index;
 		}
@@ -63,14 +68,16 @@ int ip6Parse(char *human, unsigned char *ip6) {
 		human++;
 		index++;
 	}
-	if(index >= 100) { return -1; /* Error */ }
+	if(index >= 100) { return -256; /* Error */ }
 	
 	// Zero out the output ip6, so we do not have to add zeroes with “::”
         for(index = 0 ; index < 16; index++) {
 		ip6[index] = 0;
 	}
-	human = humanStart;
+
 	// Pass 2: Convert the hex numbers in to an IPv6 IP
+	human = humanStart;
+	index = 0;
 	while(*human != 0 && index < 100) {
 		thisHex = -1;
 		if(*human >= '0' && *human <= '9') {
@@ -82,7 +89,7 @@ int ip6Parse(char *human, unsigned char *ip6) {
 		} else if(*human >= 'A' && *human <= 'F') {
 			thisHex = *human + 10 - 'A';
 		} else if(*human != ':' && *human != '-' && *human != ' ') {
-			return -1; // Error
+			return -(index + 1); // Error
 		}
 
 		if(thisHex != -1) {
@@ -103,7 +110,8 @@ int ip6Parse(char *human, unsigned char *ip6) {
 		human++;
 		index++;
 	}
-	if(index >= 100) { return -1; /* Error */ }
+	if(index >= 100) { return -256; /* Error */ }
+
 	return 1; // Success	
 }
 
