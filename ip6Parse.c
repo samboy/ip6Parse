@@ -90,7 +90,7 @@ int ip6Parse(char *human, unsigned char *ip6) {
 		thisHex = -1;
 		if(*human >= '0' && *human <= '9') {
 			thisHex = *human - '0';
-		} else if(*human == '_') {
+		} else if(*human == '_' && colonCount == 0) {
 			thisHex = 0;
 		} else if(*human >= 'a' && *human <= 'f') {
 			thisHex = *human + 10 - 'a';
