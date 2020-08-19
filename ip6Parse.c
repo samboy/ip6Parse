@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
 	run_test(test, -1, ip6);
 	
 	// Len test
-	test = "2001:db8::1234:5678:8abc:deff";
+	test = "2001:db8::1234:5678:9abc:deff";
 	if(argc == 1) {
 		for(a=10;a<=29;a++) {
 			if(a != 15 && a != 20 && a != 25) {
