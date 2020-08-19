@@ -5,6 +5,10 @@
    in to an IPv6 IP.
 
    Input: human, the string with the readable IPv6 IP
+
+   len, the length of the "human" string (make -1 to have human be
+	null-terminated)
+
    ip6: A 16-byte character array where we will place the processed
         IP.  It is up to the program calling ip6Parse to make sure this
         has 16 bytes to store the resulting IP.
@@ -21,6 +25,7 @@
 	-259: Too many colons
 	-260: No colons and we do not have 32 hex digits in string
 	-261: More than four hex digits in a row and ":" present in string
+	-262: len parameter is too large (or small)
 
    Rules: Single colon separates 16-bit (4 hex digit) numbers
           Double colon (only one allowed or error) means 
@@ -44,7 +49,7 @@
 
 #include <stdint.h>
 
-int ip6Parse(char *human, unsigned char *ip6) {
+int ip6Parse(char *human, int len, unsigned char *ip6) {
 	int afterDoubleColonQuads = 1;
 	int doubleColonIndex = -1;
 	uint16_t thisQuad = 0;	
@@ -59,9 +64,10 @@ int ip6Parse(char *human, unsigned char *ip6) {
  	char last = 0;
 	int index = 0;
 
+	if(len > 75 || (len < 2 && len != -1)) { return -262; }
 	// Pass 1: See if we have a double colon and count the colons
         // after the double colon.  Also: Count colons
-	while(*human != 0 && index < 100) {
+	while((len == -1 && *human != 0 && index < 100) || index < len) {
 		if(last == ':' && *human == ':') {
 			if(doubleColonIndex != -1) {
 				return -(index + 1);
@@ -86,7 +92,7 @@ int ip6Parse(char *human, unsigned char *ip6) {
 	// Pass 2: Convert the hex numbers in to an IPv6 IP
 	human = humanStart;
 	index = 0;
-	while(*human != 0 && index < 100) {
+	while((len == -1 && *human != 0 && index < 100) || index < len) {
 		thisHex = -1;
 		if(*human >= '0' && *human <= '9') {
 			thisHex = *human - '0';
@@ -169,7 +175,7 @@ int main(int argc, char **argv) {
 	} else {
 		test = "2001-0db8-1234-5678 0000-0000-0000-0005";
 	}
-	result = ip6Parse(test, ip6);
+	result = ip6Parse(test, -1, ip6);
 	if(result != 1) {
 		printf("ip6Parse returned error code %d\n",result);
 		return 0;
