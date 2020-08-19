@@ -198,11 +198,16 @@ int main(int argc, char **argv) {
 		puts("Usage: ip6Parse-test -or- ip6Parse-test {IPv6}");
 		return 1;
 	}
+	// Basic MaraDNS form IP test
 	run_test(test, -1, ip6);
-	test = "2001:0db8::1234:5678:8abc:deff";
+	
+	// Len test
+	test = "2001:db8::1234:5678:8abc:deff";
 	if(argc == 1) {
-		for(a=11;a<30;a++) {
-			run_test(test,a,ip6);
+		for(a=10;a<=29;a++) {
+			if(a != 15 && a != 20 && a != 25) {
+				run_test(test,a,ip6);
+			}
 		}
 	}		
 	return 0;
