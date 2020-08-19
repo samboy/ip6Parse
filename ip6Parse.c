@@ -144,7 +144,7 @@ int ip6Parse(char *human, int len, unsigned char *ip6) {
 		// Convert a series of up to four hex digits in to raw IPv6
 		if((currentHexDigit == 4 && thisHex != -1) || 
 				currentHexDigit == 8 || *human == 0
-				|| index >= len) {
+				|| (len != -1 && index >= len)) {
 			if(outIndex + 1 >= 16) { return -257; }
 			ip6[outIndex + 1] = thisQuad & 0xff;
 			ip6[outIndex] = thisQuad >> 8;
