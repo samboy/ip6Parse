@@ -25,7 +25,7 @@
 	-259: Too many colons
 	-260: No colons and we do not have 32 hex digits in string
 	-261: More than four hex digits in a row and ":" present in string
-	-262: len parameter is too large (or small)
+	-262: len parameter out of bounds
 
    Rules: Single colon separates 16-bit (4 hex digit) numbers
           Double colon (only one allowed or error) means 
@@ -143,7 +143,8 @@ int ip6Parse(char *human, int len, unsigned char *ip6) {
 		human++;
 		// Convert a series of up to four hex digits in to raw IPv6
 		if((currentHexDigit == 4 && thisHex != -1) || 
-				currentHexDigit == 8 || *human == 0) {
+				currentHexDigit == 8 || *human == 0
+				|| index >= len) {
 			if(outIndex + 1 >= 16) { return -257; }
 			ip6[outIndex + 1] = thisQuad & 0xff;
 			ip6[outIndex] = thisQuad >> 8;
@@ -166,19 +167,12 @@ int ip6Parse(char *human, int len, unsigned char *ip6) {
 
 #ifdef HAS_MAIN
 #include <stdio.h>
-int main(int argc, char **argv) {
-	char *test;
-	uint8_t ip6[16];
+int run_test(char *test, int len, uint8_t *ip6) {
 	int result;
-	if(argc > 1) {
-		test = argv[1];
-	} else {
-		test = "2001-0db8-1234-5678 0000-0000-0000-0005";
-	}
-	result = ip6Parse(test, -1, ip6);
+	result = ip6Parse(test, len, ip6);
 	if(result != 1) {
 		printf("ip6Parse returned error code %d\n",result);
-		return 0;
+		return -1;
 	}
         printf("%02x%02x-%02x%02x-%02x%02x-%02x%02x " 
 		"%02x%02x-%02x%02x-%02x%02x-%02x%02x\n",
@@ -187,5 +181,27 @@ int main(int argc, char **argv) {
                ip6[8], ip6[9], ip6[10], ip6[11],
                ip6[12], ip6[13], ip6[14], ip6[15]);
 	return 0;	
+}
+
+int main(int argc, char **argv) {
+	char *test;
+	uint8_t ip6[16];
+	int a;
+	if(argc == 2) {
+		test = argv[1];
+	} else if(argc == 1) {
+		test = "2001-0db8-1234-5678 0000-0000-0000-0005";
+	} else {
+		puts("Usage: ip6Parse-test -or- ip6Parse-test {IPv6}");
+		return 1;
+	}
+	run_test(test, -1, ip6);
+	test = "2001:0db8::1234:5678:8abc:deff";
+	if(argc == 1) {
+		for(a=11;a<30;a++) {
+			run_test(test,a,ip6);
+		}
+	}		
+	return 0;
 }
 #endif // HAS_MAIN
