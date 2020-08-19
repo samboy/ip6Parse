@@ -26,6 +26,7 @@
 	-260: No colons and we do not have 32 hex digits in string
 	-261: More than four hex digits in a row and ":" present in string
 	-262: len parameter out of bounds
+	-263: Trailing colon in name
 
    Rules: Single colon separates 16-bit (4 hex digit) numbers
           Double colon (only one allowed or error) means 
@@ -82,6 +83,8 @@ int ip6Parse(char *human, int len, unsigned char *ip6) {
 		human++;
 		index++;
 	}
+	// Trailing colon error (2001:db8::1:2000:) needs an explicit check
+	if(last == ':' && doubleColonIndex != index - 1) { return -263; } 
 	if(index >= 100) { return -256; /* Error */ }
 	
 	// Zero out the output ip6, so we do not have to add zeroes with “::”
