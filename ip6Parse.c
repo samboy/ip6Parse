@@ -6,7 +6,7 @@
 
    Input: human, the string with the readable IPv6 IP
 
-   len, the length of the "human" string (make -1 to have human be
+   len, the length of the "human" string (make -1 to have string be
 	null-terminated)
 
    ip6: A 16-byte character array where we will place the processed
