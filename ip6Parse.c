@@ -209,6 +209,12 @@ int main(int argc, char **argv) {
 				run_test(test,a,ip6);
 			}
 		}
+		// Some more tests
+		run_test("::1", -1, ip6);
+		run_test("2001:0db8:1234:5678::5", -1, ip6);
+		// MaraDNS form of IPv6 address
+		run_test("2001_db812345678__00__00__00__05", -1, ip6);
+		run_test("2001:DB8:1234:5678::5", -1, ip6);
 	}		
 	return 0;
 }
