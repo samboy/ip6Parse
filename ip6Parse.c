@@ -141,6 +141,7 @@ int ip6Parse(char *human, int len, unsigned char *ip6) {
 		}
 
 		human++;
+		index++;
 		// Convert a series of up to four hex digits in to raw IPv6
 		if((currentHexDigit == 4 && thisHex != -1) || 
 				currentHexDigit == 8 || *human == 0
@@ -156,7 +157,6 @@ int ip6Parse(char *human, int len, unsigned char *ip6) {
 			currentQuad++;
 		}
 
-		index++;
 	}
 	if(index >= 100) { return -256; /* Error */ }
 	if(colonCount == 0 && hexCount != 32) { return -260; }
